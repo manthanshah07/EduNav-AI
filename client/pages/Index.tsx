@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { DemoResponse } from "@shared/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, ChevronRight, GraduationCap, Map, Target, TrendingUp } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Index() {
   const [exampleFromServer, setExampleFromServer] = useState("");
@@ -22,7 +23,11 @@ export default function Index() {
     }
   };
 
-  const quizPercent = 68;
+  const STORAGE_KEY = "edunav.quiz.v1";
+
+  const [completionPercent, setCompletionPercent] = useState<number>(0);
+  const [submitted, setSubmitted] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const deadlines = [
     { title: "FAFSA opens", date: "2025-10-01" },
@@ -44,11 +49,32 @@ export default function Index() {
     return { color: "bg-emerald-50 text-emerald-700", label: `Due in ${days}d` };
   };
 
-  const level = {
+  const level = useMemo(() => ({
     name: "Explorer",
     tier: 3,
-    message: quizPercent >= 80 ? "You're almost at the next level!" : quizPercent >= 50 ? "Great progress — keep it up!" : "Keep going — you've got this!",
-  };
+    message: completionPercent >= 80 ? "You're almost at the next level!" : completionPercent >= 50 ? "Great progress — keep it up!" : "Keep going — you've got this!",
+  }), [completionPercent]);
+
+  // load stored progress on mount
+  useEffect(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        const answers = parsed.answers || {};
+        const totalQ = parsed.totalQuestions || 25; // fallback
+        const count = Object.keys(answers).length;
+        const pct = totalQ ? Math.round((count / totalQ) * 100) : 0;
+        setCompletionPercent(pct);
+        setSubmitted(!!parsed.submitted);
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, []);
+
+  const onContinue = () => navigate("/quiz");
+  const onReview = () => navigate("/quiz?review=1");
 
   return (
     <div className="space-y-6">
