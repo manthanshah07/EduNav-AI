@@ -73,7 +73,7 @@ export default function Index() {
     }
   }, []);
 
-  const onContinue = () => navigate("/quiz");
+  const onContinue = () => navigate("/quiz?start=1");
   const onReview = () => navigate("/quiz?review=1");
 
   return (
