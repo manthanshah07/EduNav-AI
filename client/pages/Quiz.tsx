@@ -304,7 +304,7 @@ export default function Quiz() {
             </div>
             <div className="w-1/3">
               <Progress value={completionPercent} />
-              <div className="mt-2 text-right text-sm text-slate-600">{completionPercent}% completed • {quizPercent >= 80 ? "Almost there!" : quizPercent >= 50 ? "Great progress — keep going!" : "Keep going — you've got this!"}</div>
+              <div className="mt-2 text-right text-sm text-slate-600">{completionPercent}% completed • {completionPercent >= 80 ? "Almost there!" : completionPercent >= 50 ? "Great progress — keep going!" : "Keep going — you've got this!"}</div>
             </div>
           </div>
         </CardHeader>
