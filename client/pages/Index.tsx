@@ -107,7 +107,7 @@ export default function Index() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-slate-800">Career Quiz Progress</CardTitle>
-                <CardDescription>You're {quizPercent}% of the way to your personalized career roadmap.</CardDescription>
+                <CardDescription>{submitted ? "Career Roadmap Ready!" : `You're ${completionPercent}% of the way to your personalized career roadmap.`}</CardDescription>
               </div>
               <div className="text-right">
                 <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
@@ -119,15 +119,15 @@ export default function Index() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
-              <Progress value={quizPercent} />
+              <Progress value={submitted ? 100 : completionPercent} />
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-slate-700">{quizPercent}%</span>
+                <span className="text-sm font-medium text-slate-700">{submitted ? 100 : completionPercent}%</span>
                 <span className="text-xs text-slate-500">{level.message}</span>
               </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
-              <Button size="sm" className="rounded-full">Continue Quiz</Button>
-              <Button size="sm" variant="outline" className="rounded-full">Review Answers</Button>
+              <Button size="sm" className="rounded-full" onClick={onContinue}>Continue Quiz</Button>
+              <Button size="sm" variant="outline" className="rounded-full" onClick={onReview}>Review Answers</Button>
             </div>
           </CardContent>
         </Card>
