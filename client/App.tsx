@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import Quiz from "./pages/Quiz";
 import Courses from "./pages/Courses";
 import Colleges from "./pages/Colleges";
+import Timeline from "./pages/Timeline";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import AppLayout from "@/components/layout/AppLayout";
 
