@@ -151,7 +151,16 @@ const STORAGE_KEY = "edunav.quiz.v1";
 
 export default function Quiz() {
   const totalQuestions = SECTIONS.reduce((s, sec) => s + sec.questions.length, 0);
-  const [step, setStep] = useState(0); // section index
+  const [step, setStep] = useState<number>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return typeof parsed.step === 'number' ? parsed.step : 0;
+      }
+    } catch {}
+    return 0;
+  }); // section index
   const [answers, setAnswers] = useState<Record<string, any>>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -162,14 +171,24 @@ export default function Quiz() {
     return {};
   });
   const [direction, setDirection] = useState<"next" | "back">("next");
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<boolean>(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return !!JSON.parse(raw).submitted;
+    } catch {}
+    return false;
+  });
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const location = (typeof window !== 'undefined' && window.location) ? new URL(window.location.href) : null;
+  const reviewMode = location ? location.search.includes('review=1') : false;
+  // if reviewMode present, we will auto-start and lock inputs (handled downstream)
 
   useEffect(() => {
-    // persist
-    const payload = { step, answers };
+    // persist including metadata
+    const payload: any = { step, answers, totalQuestions };
+    if (submitted) payload.submitted = true;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-  }, [step, answers]);
+  }, [step, answers, submitted, totalQuestions]);
 
   const section = SECTIONS[step];
 
@@ -273,7 +292,14 @@ export default function Quiz() {
 
   const handleSubmit = () => {
     setSubmitted(true);
-    // clear stored? keep for retrieval
+    // persist submitted flag immediately
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : {};
+    parsed.submitted = true;
+    parsed.step = step;
+    parsed.answers = answers;
+    parsed.totalQuestions = totalQuestions;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
   };
 
   // animation helpers
