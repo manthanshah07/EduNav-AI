@@ -1,4 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function Settings() {
@@ -7,14 +13,18 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Settings</h2>
-          <p className="text-sm text-muted-foreground">Manage your account and preferences.</p>
+          <p className="text-sm text-muted-foreground">
+            Manage your account and preferences.
+          </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
-          <CardDescription>Update profile and notification preferences</CardDescription>
+          <CardDescription>
+            Update profile and notification preferences
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -29,7 +39,9 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-medium">Notifications</div>
-                <div className="text-sm text-slate-600">Email reminders and deadlines</div>
+                <div className="text-sm text-slate-600">
+                  Email reminders and deadlines
+                </div>
               </div>
               <Button variant="outline">Manage</Button>
             </div>
