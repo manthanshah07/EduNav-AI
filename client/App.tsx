@@ -24,6 +24,9 @@ const App = () => (
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<Index />} />
+            <Route path="quiz" element={<Quiz />} />
+            <Route path="courses" element={<Courses />} />
+            <Route path="colleges" element={<Colleges />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Route>
