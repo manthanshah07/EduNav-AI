@@ -78,13 +78,26 @@ export default function Index() {
       <section className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-slate-800">Career Quiz Progress</CardTitle>
-            <CardDescription>You're {quizPercent}% of the way to your personalized career roadmap.</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-slate-800">Career Quiz Progress</CardTitle>
+                <CardDescription>You're {quizPercent}% of the way to your personalized career roadmap.</CardDescription>
+              </div>
+              <div className="text-right">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-medium text-white/90">
+                  <TrendingUp className="h-4 w-4 text-white" />
+                  <span>Level {level.tier} • {level.name}</span>
+                </div>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-4">
               <Progress value={quizPercent} />
-              <span className="text-sm font-medium text-slate-700">{quizPercent}%</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-slate-700">{quizPercent}%</span>
+                <span className="text-xs text-slate-500">{level.message}</span>
+              </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
               <Button size="sm" className="rounded-full">Continue Quiz</Button>
@@ -99,27 +112,22 @@ export default function Index() {
           </CardHeader>
           <CardContent>
             <ul className="space-y-3 text-sm">
-              <li className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  FAFSA opens
-                </div>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">Oct 1</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  SAT registration
-                </div>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">Sep 15</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                  UC app opens
-                </div>
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">Aug 1</span>
-              </li>
+              {deadlines.map((d) => {
+                const days = daysUntil(d.date);
+                const urgency = urgencyFor(days);
+                return (
+                  <li key={d.title} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className={`h-4 w-4 ${days < 7 ? "text-red-500" : "text-emerald-500"}`} />
+                      <span className="font-medium">{d.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`rounded-full px-2 py-0.5 text-xs ${urgency.color}`}>{urgency.label}</span>
+                      <span className="hidden text-xs text-slate-500 md:inline">{new Date(d.date).toLocaleDateString()}</span>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
             <div className="mt-4">
               <Button variant="ghost" className="group w-full justify-start px-0 text-sky-700 hover:bg-transparent hover:text-sky-800">
