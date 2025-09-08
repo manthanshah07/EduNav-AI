@@ -181,7 +181,8 @@ export default function Quiz() {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const location = (typeof window !== 'undefined' && window.location) ? new URL(window.location.href) : null;
   const reviewMode = location ? location.search.includes('review=1') : false;
-  // if reviewMode present, we will auto-start and lock inputs (handled downstream)
+  const startParam = location ? location.search.includes('start=1') : false;
+  // if reviewMode or startParam present, auto-start
 
   useEffect(() => {
     // persist including metadata
@@ -314,6 +315,13 @@ export default function Quiz() {
   // If there are saved answers, show continue option but don't auto-start
   const hasSaved = useMemo(() => Object.keys(answers || {}).length > 0, [answers]);
 
+  // Auto-start if URL instructs to (continue or review)
+  useEffect(() => {
+    if (startParam || reviewMode) {
+      setStarted(true);
+    }
+  }, [startParam, reviewMode]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -385,26 +393,26 @@ export default function Quiz() {
                             {q.options?.map((o) => (
                               <button
                                 key={o.id}
-                                onClick={() => setAnswer(q.id, o.id)}
-                                className={`rounded-md border px-3 py-2 text-left transition-shadow ${answers[q.id] === o.id ? "bg-sky-50 border-sky-300 shadow" : "bg-white border-slate-200"}`}>
+                                onClick={() => { if (reviewMode) return; setAnswer(q.id, o.id); }}
+                                className={`rounded-md border px-3 py-2 text-left transition-shadow ${answers[q.id] === o.id ? "bg-sky-50 border-sky-300 shadow" : "bg-white border-slate-200"} ${reviewMode ? 'opacity-60 cursor-not-allowed' : ''}`}>
                                 {o.label}
-                              </button>
+                            </button>
                             ))}
                           </div>
                         )}
 
                         {q.type === "yesno" && (
                           <div className="flex gap-3">
-                            <button onClick={() => setAnswer(q.id, true)} className={`rounded-md px-3 py-2 ${answers[q.id] === true ? "bg-sky-600 text-white" : "bg-white"}`}>Yes</button>
-                            <button onClick={() => setAnswer(q.id, false)} className={`rounded-md px-3 py-2 ${answers[q.id] === false ? "bg-sky-600 text-white" : "bg-white"}`}>No</button>
+                            <button onClick={() => { if (reviewMode) return; setAnswer(q.id, true); }} className={`rounded-md px-3 py-2 ${answers[q.id] === true ? "bg-sky-600 text-white" : "bg-white"} ${reviewMode ? 'opacity-60 cursor-not-allowed' : ''}`}>Yes</button>
+                            <button onClick={() => { if (reviewMode) return; setAnswer(q.id, false); }} className={`rounded-md px-3 py-2 ${answers[q.id] === false ? "bg-sky-600 text-white" : "bg-white"} ${reviewMode ? 'opacity-60 cursor-not-allowed' : ''}`}>No</button>
                           </div>
                         )}
 
                         {q.type === "rating" && (
                           <div className="flex items-center gap-2">
                             {[1, 2, 3, 4, 5].map((n) => (
-                              <button key={n} onClick={() => setAnswer(q.id, n)} className={`h-9 w-9 rounded-full ${answers[q.id] === n ? "bg-sky-600 text-white" : "bg-slate-100 text-slate-700"}`}>{n}</button>
-                            ))}
+                            <button key={n} onClick={() => { if (reviewMode) return; setAnswer(q.id, n); }} className={`h-9 w-9 rounded-full ${answers[q.id] === n ? "bg-sky-600 text-white" : "bg-slate-100 text-slate-700"} ${reviewMode ? 'opacity-60 cursor-not-allowed' : ''}`}>{n}</button>
+                          ))}
                           </div>
                         )}
 
