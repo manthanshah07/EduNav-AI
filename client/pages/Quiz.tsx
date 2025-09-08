@@ -283,6 +283,11 @@ export default function Quiz() {
     return "translate-x-4 opacity-0 pointer-events-none absolute";
   };
 
+  const [started, setStarted] = useState(false);
+
+  // If there are saved answers, show continue option but don't auto-start
+  const hasSaved = useMemo(() => Object.keys(answers || {}).length > 0, [answers]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -295,88 +300,117 @@ export default function Quiz() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between w-full">
+      {/* Intro / Start screen */}
+      {!started && !submitted && (
+        <Card>
+          <CardHeader>
             <div>
-              <CardTitle>Find your path — step {step + 1} of {SECTIONS.length}</CardTitle>
-              <CardDescription>{SECTIONS[step].title}</CardDescription>
+              <CardTitle>Find your path</CardTitle>
+              <CardDescription>Take a short quiz to get personalized career and college recommendations. It takes ~10 minutes.</CardDescription>
             </div>
-            <div className="w-1/3">
-              <Progress value={completionPercent} />
-              <div className="mt-2 text-right text-sm text-slate-600">{completionPercent}% completed • {completionPercent >= 80 ? "Almost there!" : completionPercent >= 50 ? "Great progress — keep going!" : "Keep going — you've got this!"}</div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="relative min-h-[240px]">
-            {SECTIONS.map((sec, idx) => (
-              <div key={sec.id} className={`transition-all duration-300 ${getTransition(idx)} bg-background px-2 py-2`}>
-                <div className="space-y-4">
-                  {sec.questions.map((q) => (
-                    <div key={q.id} className="space-y-2 border-b last:border-b-0 pb-4">
-                      <div className="flex items-center justify-between">
-                        <div className="font-medium">{q.text}</div>
-                        <div className="text-xs text-muted-foreground">{q.type === "rating" ? "Rate 1-5" : q.type === "yesno" ? "Yes / No" : "Choose one"}</div>
-                      </div>
-
-                      {/* Render controls */}
-                      {q.type === "mcq" && (
-                        <div className="flex flex-col gap-2">
-                          {q.options?.map((o) => (
-                            <button
-                              key={o.id}
-                              onClick={() => setAnswer(q.id, o.id)}
-                              className={`rounded-md border px-3 py-2 text-left transition-shadow ${answers[q.id] === o.id ? "bg-sky-50 border-sky-300 shadow" : "bg-white border-slate-200"}`}>
-                              {o.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-
-                      {q.type === "yesno" && (
-                        <div className="flex gap-3">
-                          <button onClick={() => setAnswer(q.id, true)} className={`rounded-md px-3 py-2 ${answers[q.id] === true ? "bg-sky-600 text-white" : "bg-white"}`}>Yes</button>
-                          <button onClick={() => setAnswer(q.id, false)} className={`rounded-md px-3 py-2 ${answers[q.id] === false ? "bg-sky-600 text-white" : "bg-white"}`}>No</button>
-                        </div>
-                      )}
-
-                      {q.type === "rating" && (
-                        <div className="flex items-center gap-2">
-                          {[1, 2, 3, 4, 5].map((n) => (
-                            <button key={n} onClick={() => setAnswer(q.id, n)} className={`h-9 w-9 rounded-full ${answers[q.id] === n ? "bg-sky-600 text-white" : "bg-slate-100 text-slate-700"}`}>{n}</button>
-                          ))}
-                        </div>
-                      )}
-
-                    </div>
-                  ))}
-                </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-2">
+                <p className="text-sm text-slate-700">Your progress will be saved locally so you can continue later.</p>
+                {hasSaved && <p className="text-sm text-slate-600">We found a saved quiz. You can continue where you left off or start fresh.</p>}
               </div>
-            ))}
-          </div>
-
-          <div className="mt-6 flex items-center justify-between">
-            <div>
-              <Button variant="ghost" onClick={goBack} disabled={step === 0} className="inline-flex items-center gap-2"><ChevronLeft /> Back</Button>
+              <div className="flex items-center gap-3">
+                {hasSaved && (
+                  <Button onClick={() => setStarted(true)} className="bg-sky-600 text-white">Continue Quiz</Button>
+                )}
+                <Button onClick={() => { localStorage.removeItem(STORAGE_KEY); setAnswers({}); setStarted(true); }} className="bg-emerald-500 text-white">Begin Quiz</Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              {step < SECTIONS.length - 1 && (
-                <Button onClick={goNext} className="inline-flex items-center gap-2">Next <ChevronRight /></Button>
-              )}
+          </CardContent>
+        </Card>
+      )}
 
-              {step === SECTIONS.length - 1 && !submitted && (
-                <Button onClick={handleSubmit} className="bg-sky-600 text-white inline-flex items-center gap-2">Submit</Button>
-              )}
-
-              {submitted && results && (
-                <Button onClick={() => window.alert(JSON.stringify(results, null, 2))} className="inline-flex items-center gap-2">View Results</Button>
-              )}
+      {/* Quiz content */}
+      {started && !submitted && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <CardTitle>Find your path — step {step + 1} of {SECTIONS.length}</CardTitle>
+                <CardDescription>{SECTIONS[step].title}</CardDescription>
+              </div>
+              <div className="w-1/3">
+                <Progress value={completionPercent} />
+                <div className="mt-2 text-right text-sm text-slate-600">{completionPercent}% completed • {completionPercent >= 80 ? "Almost there!" : completionPercent >= 50 ? "Great progress — keep going!" : "Keep going — you've got this!"}</div>
+              </div>
             </div>
-          </div>
+          </CardHeader>
+          <CardContent>
+            <div className="relative min-h-[240px]">
+              {SECTIONS.map((sec, idx) => (
+                <div key={sec.id} className={`transition-all duration-300 ${getTransition(idx)} bg-background px-2 py-2`}>
+                  <div className="space-y-4">
+                    {sec.questions.map((q) => (
+                      <div key={q.id} className="space-y-2 border-b last:border-b-0 pb-4">
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">{q.text}</div>
+                          <div className="text-xs text-muted-foreground">{q.type === "rating" ? "Rate 1-5" : q.type === "yesno" ? "Yes / No" : "Choose one"}</div>
+                        </div>
 
-        </CardContent>
-      </Card>
+                        {/* Render controls */}
+                        {q.type === "mcq" && (
+                          <div className="flex flex-col gap-2">
+                            {q.options?.map((o) => (
+                              <button
+                                key={o.id}
+                                onClick={() => setAnswer(q.id, o.id)}
+                                className={`rounded-md border px-3 py-2 text-left transition-shadow ${answers[q.id] === o.id ? "bg-sky-50 border-sky-300 shadow" : "bg-white border-slate-200"}`}>
+                                {o.label}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {q.type === "yesno" && (
+                          <div className="flex gap-3">
+                            <button onClick={() => setAnswer(q.id, true)} className={`rounded-md px-3 py-2 ${answers[q.id] === true ? "bg-sky-600 text-white" : "bg-white"}`}>Yes</button>
+                            <button onClick={() => setAnswer(q.id, false)} className={`rounded-md px-3 py-2 ${answers[q.id] === false ? "bg-sky-600 text-white" : "bg-white"}`}>No</button>
+                          </div>
+                        )}
+
+                        {q.type === "rating" && (
+                          <div className="flex items-center gap-2">
+                            {[1, 2, 3, 4, 5].map((n) => (
+                              <button key={n} onClick={() => setAnswer(q.id, n)} className={`h-9 w-9 rounded-full ${answers[q.id] === n ? "bg-sky-600 text-white" : "bg-slate-100 text-slate-700"}`}>{n}</button>
+                            ))}
+                          </div>
+                        )}
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex items-center justify-between">
+              <div>
+                <Button variant="ghost" onClick={goBack} disabled={step === 0} className="inline-flex items-center gap-2"><ChevronLeft /> Back</Button>
+              </div>
+              <div className="flex items-center gap-3">
+                {step < SECTIONS.length - 1 && (
+                  <Button onClick={goNext} className="inline-flex items-center gap-2">Next <ChevronRight /></Button>
+                )}
+
+                {step === SECTIONS.length - 1 && !submitted && (
+                  <Button onClick={handleSubmit} className="bg-sky-600 text-white inline-flex items-center gap-2">Submit</Button>
+                )}
+
+                {submitted && results && (
+                  <Button onClick={() => window.alert(JSON.stringify(results, null, 2))} className="inline-flex items-center gap-2">View Results</Button>
+                )}
+              </div>
+            </div>
+
+          </CardContent>
+        </Card>
+      )}
 
       {submitted && results && (
         <Card>
