@@ -24,20 +24,46 @@ export default function Index() {
 
   const quizPercent = 68;
 
+  const deadlines = [
+    { title: "FAFSA opens", date: "2025-10-01" },
+    { title: "SAT registration", date: "2025-09-15" },
+    { title: "UC app opens", date: "2025-08-01" },
+  ];
+
+  const daysUntil = (isoDate: string) => {
+    const now = new Date();
+    const then = new Date(isoDate + "T00:00:00");
+    const diff = Math.ceil((then.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
+
+  const urgencyFor = (days: number) => {
+    if (days < 0) return { color: "bg-slate-200 text-slate-600", label: "Passed" };
+    if (days < 7) return { color: "bg-red-50 text-red-700", label: `Due in ${days}d` };
+    if (days <= 30) return { color: "bg-amber-50 text-amber-700", label: `Due in ${days}d` };
+    return { color: "bg-emerald-50 text-emerald-700", label: `Due in ${days}d` };
+  };
+
+  const level = {
+    name: "Explorer",
+    tier: 3,
+    message: quizPercent >= 80 ? "You're almost at the next level!" : quizPercent >= 50 ? "Great progress — keep it up!" : "Keep going — you've got this!",
+  };
+
   return (
-    <div className="space-y-8">
-      {/* Gradient header */}
+    <div className="space-y-6">
+      {/* Gradient header (reduced height for better hierarchy) */}
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-500 to-emerald-500 text-white shadow-sm">
-        <div className="absolute inset-0 opacity-20 [background:radial-gradient(circle_at_30%_20%,white_0,transparent_40%),radial-gradient(circle_at_70%_60%,white_0,transparent_35%)]" />
-        <div className="relative px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
-          <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+        <div className="absolute inset-0 opacity-18 [background:radial-gradient(circle_at_30%_20%,white_0,transparent_40%),radial-gradient(circle_at_70%_60%,white_0,transparent_35%)]" />
+        <div className="relative px-6 py-6 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
-              <p className="text-sm/6 uppercase tracking-widest text-white/80">AI-powered Guidance</p>
-              <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl lg:text-4xl">Welcome back, Alex!</h1>
-              <p className="mt-2 max-w-2xl text-white/90">Pick up where you left off. Continue your career quiz, explore college matches, and stay on top of upcoming deadlines.</p>
+              <p className="text-xs uppercase tracking-widest text-white/85">AI-powered Guidance</p>
+              <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl lg:text-3xl">Welcome back, Alex!</h1>
+              <p className="mt-2 max-w-2xl text-white/95">Pick up where you left off. Continue your career quiz, explore college matches, and stay on top of upcoming deadlines.</p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <Button className="rounded-full bg-gradient-to-r from-sky-600 to-emerald-600 text-white shadow hover:from-sky-700 hover:to-emerald-700">
+              <Button className="rounded-full bg-gradient-to-r from-sky-600 to-emerald-600 text-white shadow-sm hover:from-sky-700 hover:to-emerald-700">
                 Find My Path
               </Button>
               <Button variant="outline" className="rounded-full bg-white/10 text-white border-white/30 hover:bg-white/20">
@@ -48,7 +74,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Progress + Quick stats */}
+      {/* Progress + Quick stats (with gamification) */}
       <section className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-2">
           <CardHeader>
